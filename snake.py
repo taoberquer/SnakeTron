@@ -8,7 +8,7 @@ class Snake:
         self.rect = self.image.get_rect()
         self.rect.x = 100
         self.rect.y = 0
-        self.vel = 5
+        self.vel = 20
         self.body = []
         self.length = 1
         self.direction = "right"
@@ -35,7 +35,7 @@ class Snake:
         return False
 
     def check_food_collision(self, food):
-        if self.rect.x == food.x and self.rect.y == food.y:
+        if self.rect.x == food.rect.x and self.rect.y == food.rect.y:
             return True
         return False
 

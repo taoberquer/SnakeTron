@@ -1,6 +1,8 @@
 import random
 
 import pygame
+
+from food import Food
 from snake import Snake
 
 
@@ -11,6 +13,22 @@ class Game:
         self.score = 0
         self.game_over = False
         self.food = self.generate_food()
+
+    def run(self):
+        while not self.game_over:
+            self.screen.fill((0, 0, 0))
+            self.screen.blit(self.snake.image, self.snake.rect)
+            self.screen.blit(self.food.image, self.food.rect)
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game_over = True
+                if event.type == pygame.KEYDOWN:
+                    self.user_input(event.key)
+
+            self.move_snake()
+            pygame.time.Clock().tick(5)
 
     def user_input(self, key):
         switch = {
@@ -32,8 +50,4 @@ class Game:
             self.snake.eat_food()
 
     def generate_food(self):
-        block_size = 20
-        x = random.randint(0, 800 - block_size)
-        y = random.randint(0, 600 - block_size)
-
-        return pygame.Rect(x, y, block_size, block_size)
+        return Food()
