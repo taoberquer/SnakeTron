@@ -1,15 +1,26 @@
 import pygame
-# par la même occasion cela importe pygame.locals dans l'espace de nom de Pygame
+
+from game import Game
 
 pygame.init()
 
-ecran = pygame.display.set_mode((300, 200))
+screen = pygame.display.set_mode((800, 600))
 
-continuer = True
+game = Game(screen)
 
-while continuer:
+# start game loop
+while not game.game_over:
+    screen.blit(game.snake.image, game.snake.rect)
+
+    # check for events
     for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            continuer = False
+        if event.type == pygame.QUIT:
+            running = game.game_over = True
+        elif event.type == pygame.KEYDOWN:
+            game.user_input(event.key)
+    game.move_snake()
 
-pygame.quit()
+
+    # pygame.display.flip()
+    pygame.display.update()
+    pygame.time.Clock().tick(1)
