@@ -4,8 +4,14 @@ from game import Game
 
 pygame.init()
 
-screen = pygame.display.set_mode((800, 600))
+settings = {
+    'screen_width': 800,
+    'screen_height': 600,
+    'size': 20,
+}
 
-game = Game(screen)
+screen = pygame.display.set_mode((settings['screen_width'], settings['screen_height']))
+
+game = Game(screen, settings)
 
 game.run()

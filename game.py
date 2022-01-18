@@ -7,9 +7,9 @@ from snake import Snake
 
 
 class Game:
-    def __init__(self, screen):
+    def __init__(self, screen, settings):
         self.screen = screen
-        self.snake = Snake()
+        self.snake = Snake(settings)
         self.score = 0
         self.game_over = False
         self.food = self.generate_food()
@@ -48,6 +48,7 @@ class Game:
         if self.snake.check_food_collision(self.food):
             self.score += 1
             self.snake.eat_food()
+            self.food = self.generate_food()
 
     def generate_food(self):
         return Food()
