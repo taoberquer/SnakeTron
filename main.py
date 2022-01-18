@@ -10,7 +10,6 @@ game = Game(screen)
 
 # start game loop
 while not game.game_over:
-    screen.blit(game.snake.image, game.snake.rect)
 
     # check for events
     for event in pygame.event.get():
@@ -19,8 +18,8 @@ while not game.game_over:
         elif event.type == pygame.KEYDOWN:
             game.user_input(event.key)
     game.move_snake()
+    screen.fill((0, 0, 0))
+    screen.blit(game.snake.image, game.snake.rect)
 
-
-    # pygame.display.flip()
-    pygame.display.update()
-    pygame.time.Clock().tick(1)
+    pygame.display.flip()
+    pygame.time.Clock().tick(10)
