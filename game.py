@@ -17,7 +17,7 @@ class Game:
     def run(self):
         while not self.game_over:
             self.screen.fill((0, 0, 0))
-            self.screen.blit(self.snake.image, self.snake.rect)
+            self.print_snake()
             self.screen.blit(self.food.image, self.food.rect)
             pygame.display.update()
 
@@ -52,3 +52,7 @@ class Game:
 
     def generate_food(self):
         return Food()
+
+    def print_snake(self):
+        for part in self.snake.body:
+            self.screen.blit(part.image, part.rect)

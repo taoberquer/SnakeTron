@@ -1,5 +1,7 @@
 import pygame
 
+from body import Body
+
 
 class Snake:
     def __init__(self, settings):
@@ -13,6 +15,7 @@ class Snake:
         self.length = 1
         self.direction = "right"
         self.settings = settings
+        self.generate_body()
 
     def set_direction(self, direction):
         self.direction = direction
@@ -26,12 +29,16 @@ class Snake:
             self.rect.y -= self.vel
         elif self.direction == "down":
             self.rect.y += self.vel
+        self.generate_body()
+        self.body.pop(0)
 
     def check_collision(self):
-        if self.rect.x < 0 or self.rect.x > self.settings['screen_width'] or self.rect.y < 0 or self.rect.y > self.settings['screen_height']:
+        if self.rect.x < 0 or self.rect.x > self.settings['screen_width'] or self.rect.y < 0 or self.rect.y > \
+                self.settings['screen_height']:
             return True
-        for body in self.body:
-            if self.rect.x == body.rect.x and self.rect.y == body.rect.y:
+        for index, body in enumerate(self.body):
+            if (index != len(self.body) - 1) and (self.rect.x == body.rect.x and self.rect.y == body.rect.y):
+                print(index)
                 return True
         return False
 
@@ -40,5 +47,9 @@ class Snake:
             return True
         return False
 
+    def generate_body(self):
+        self.body.append(Body(self.rect.x, self.rect.y, self.settings['size']))
+
     def eat_food(self):
         self.length += 1
+        self.body.insert(0, Body(self.body[0].rect.x, self.body[0].rect.y, self.settings['size']))
