@@ -9,7 +9,7 @@ from snake import Snake
 class Game:
     def __init__(self, screen, settings):
         self.screen = screen
-        self.snake = Snake(settings)
+        self.snakes = [Snake(100, 200, settings), Snake(400, 200, settings)]
         self.score = 0
         self.game_over = False
         self.food = self.generate_food()
@@ -17,7 +17,7 @@ class Game:
     def run(self):
         while not self.game_over:
             self.screen.fill((0, 0, 0))
-            self.print_snake()
+            self.display_snakes()
             self.screen.blit(self.food.image, self.food.rect)
             pygame.display.update()
 
@@ -27,7 +27,7 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     self.user_input(event.key)
 
-            self.move_snake()
+            self.snakes_move()
             pygame.time.Clock().tick(5)
 
     def user_input(self, key):
@@ -38,21 +38,43 @@ class Game:
             pygame.K_RIGHT: 'right'
         }
         if key in switch:
-            self.snake.set_direction(switch[key])
-
-    def move_snake(self):
-        self.snake.move()
-        if self.snake.check_collision():
-            self.game_over = True
-            return
-        if self.snake.check_food_collision(self.food):
-            self.score += 1
-            self.snake.eat_food()
-            self.food = self.generate_food()
+            self.snakes[0].set_direction(switch[key])
+        switch = {
+            pygame.K_z: 'up',
+            pygame.K_s: 'down',
+            pygame.K_q: 'left',
+            pygame.K_d: 'right'
+        }
+        if key in switch:
+            self.snakes[1].set_direction(switch[key])
 
     def generate_food(self):
         return Food()
 
-    def print_snake(self):
-        for part in self.snake.body:
-            self.screen.blit(part.image, part.rect)
+    def display_snakes(self):
+        for snake in self.snakes:
+            for part in snake.body:
+                self.screen.blit(part.image, part.rect)
+
+    def snakes_move(self):
+        for snake in self.snakes:
+            snake.move()
+        if self.snakes_collide(self.snakes):
+            self.game_over = True
+            return
+        for snake in self.snakes:
+            snake.remove_last_body()
+        if self.snakes_check_food_collision(self.food):
+            self.food = self.generate_food()
+
+    def snakes_collide(self, snakes):
+        for snake in snakes:
+            for other_snake in snakes:
+                if snake != other_snake:
+                    if snake.check_collision(other_snake):
+                        return True
+
+    def snakes_check_food_collision(self, food):
+        for snake in self.snakes:
+            if snake.check_food_collision(food):
+                return True
