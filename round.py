@@ -38,6 +38,8 @@ class Round:
         }
         if key in switch:
             self.snakes[0].set_direction(switch[key])
+        if not self.settings['multiplayer']:
+            return
         switch = {
             pygame.K_z: 'up',
             pygame.K_s: 'down',
