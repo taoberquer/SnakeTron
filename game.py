@@ -1,81 +1,48 @@
-import random
+import pygame_menu
 
-import pygame
-
-from food import Food
-from score import Score
-from snake import Snake
+from round import Round
 
 
 class Game:
     def __init__(self, screen, settings):
         self.screen = screen
-        self.snakes = [Snake(100, 200, settings), Snake(400, 200, settings)]
-        self.score = Score()
-        self.game_over = False
-        self.food = self.generate_food()
+        self.settings = settings
 
-    def run(self):
-        while not self.game_over:
-            self.screen.fill((0, 0, 0))
-            self.display_snakes()
-            self.screen.blit(self.food.image, self.food.rect)
-            pygame.display.update()
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.game_over = True
-                if event.type == pygame.KEYDOWN:
-                    self.user_input(event.key)
+    def start_the_game(self):
+        round = Round(self.screen, self.settings)
+        round.run()
+        pygame_menu.events.EXIT
 
-            self.snakes_move()
-            pygame.time.Clock().tick(5)
 
-    def user_input(self, key):
-        switch = {
-            pygame.K_UP: 'up',
-            pygame.K_DOWN: 'down',
-            pygame.K_LEFT: 'left',
-            pygame.K_RIGHT: 'right'
-        }
-        if key in switch:
-            self.snakes[0].set_direction(switch[key])
-        switch = {
-            pygame.K_z: 'up',
-            pygame.K_s: 'down',
-            pygame.K_q: 'left',
-            pygame.K_d: 'right'
-        }
-        if key in switch:
-            self.snakes[1].set_direction(switch[key])
 
-    def generate_food(self):
-        return Food()
+    def launch(self):
+        menu = pygame_menu.Menu('El Sneko del fuego', self.settings['screen_width'], self.settings['screen_height'], theme=pygame_menu.themes.THEME_DARK)
+        menu.add.selector('Nombre de joueurs : ', [('1', 1), ('2', 2)], onchange=self.set_user_number)
+        menu.add.selector('Grille torique : ', [('OUI', True), ('NON', False), ('Difficile', 3)], onchange=self.toric_grid)
+        menu.add.selector('Trou de ver : ', [('OUI', True), ('NON', False), ('Difficile', 3)], onchange=self.wormhole)
+        menu.add.selector('Murs aléatoires : ', [('OUI', True), ('NON', False)], onchange=self.random_walls)
+        menu.add.selector('Murs aléatoires dynamiques : ', [('OUI', True), ('2', False)], onchange=self.dynamic_random_walls)
+        menu.add.selector('Réduction : ', [('OUI', True), ('NON', False)], onchange=self.reduction)
 
-    def display_snakes(self):
-        for snake in self.snakes:
-            for part in snake.body:
-                self.screen.blit(part.image, part.rect)
+        menu.add.button('Jouer', self.start_the_game)
+        menu.add.button('Quitter', pygame_menu.events.EXIT)
+        menu.mainloop(self.screen)
 
-    def snakes_move(self):
-        for snake in self.snakes:
-            snake.move()
-        if self.snakes_collide(self.snakes):
-            self.game_over = True
-            return
-        for snake in self.snakes:
-            snake.remove_last_body()
-        if self.snakes_check_food_collision(self.food):
-            self.food = self.generate_food()
+    def set_user_number(self, *args):
+        self.settings['user_number'] = args[1]
 
-    def snakes_collide(self, snakes):
-        for snake in snakes:
-            for other_snake in snakes:
-                if snake != other_snake:
-                    if snake.check_collision(other_snake):
-                        return True
+    def toric_grid(self, *args):
+        self.settings['toric_grid'] = args[1]
 
-    def snakes_check_food_collision(self, food):
-        for snake in self.snakes:
-            if snake.check_food_collision(food):
-                return True
+    def wormhole(self, *args):
+        self.settings['wormhole'] = args[1]
+
+    def random_walls(self, *args):
+        self.settings['random_walls'] = args[1]
+
+    def dynamic_random_walls(self, *args):
+        self.settings['dynamic_random_walls'] = args[1]
+
+    def reduction(self, *args):
+        self.settings['reduction'] = args[1]
