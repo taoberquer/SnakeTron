@@ -3,6 +3,7 @@ import random
 import pygame
 
 from food import Food
+from score import Score
 from snake import Snake
 
 
@@ -10,7 +11,7 @@ class Game:
     def __init__(self, screen, settings):
         self.screen = screen
         self.snakes = [Snake(100, 200, settings), Snake(400, 200, settings)]
-        self.score = 0
+        self.score = Score()
         self.game_over = False
         self.food = self.generate_food()
 
