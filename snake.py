@@ -18,6 +18,12 @@ class Snake:
         self.generate_body()
 
     def set_direction(self, direction):
+        vertical = ["up", "down"]
+        horizontal = ["left", "right"]
+        if direction in vertical and self.direction in vertical:
+            return
+        if direction in horizontal and self.direction in horizontal:
+            return
         self.direction = direction
 
     def move(self):
