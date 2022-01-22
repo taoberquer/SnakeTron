@@ -8,10 +8,17 @@ from snake import Snake
 class Round:
     def __init__(self, screen, settings):
         self.screen = screen
-        self.snakes = [Snake(100, 200, settings), Snake(400, 200, settings)]
+        self.settings = settings
+        self.snakes = self.init_sakes()
         self.score = Score()
         self.game_over = False
         self.food = self.generate_food()
+
+    def init_sakes(self):
+        snakes = [Snake(100, 200, self.settings)]
+        if self.settings['multiplayer']:
+            snakes.append(Snake(400, 200, self.settings))
+        return snakes
 
     def run(self):
         while not self.game_over:
