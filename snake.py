@@ -35,18 +35,22 @@ class Snake:
             self.rect.y -= self.vel
         elif self.direction == "down":
             self.rect.y += self.vel
+        self.remove_last_body()
         self.generate_body()
 
     def check_collision(self, other_snake):
         if self.rect.x < 0 or self.rect.x > self.settings['screen_width']-self.settings['size'] or self.rect.y < 0 or self.rect.y > \
                 self.settings['screen_height']-self.settings['size']:
             return True
-        for index, body in enumerate(other_snake.body):
-            if self.rect.x == body.rect.x and self.rect.y == body.rect.y:
-                return True
         for index, body in enumerate(self.body):
             if (index != len(self.body) - 1) and (self.rect.x == body.rect.x and self.rect.y == body.rect.y):
                 return True
+        
+        if other_snake:
+            for index, body in enumerate(other_snake.body):
+                if self.rect.x == body.rect.x and self.rect.y == body.rect.y:
+                    return True
+        
         return False
 
 

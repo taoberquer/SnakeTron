@@ -11,6 +11,6 @@ class Score:
         except FileNotFoundError:
             self.best_score = 0
 
-    def save_score(self):
+    def save_score(self, score):
         with open('score.txt', 'w') as f:
-            f.write(str(self.best_score))
+            f.write(str(score))
