@@ -92,6 +92,7 @@ class Round:
             self.snakes[1].set_direction(switch[key])
 
     def generate_food(self):
+        
         self.specials["food"] = Food(self.specials, self.settings['size'])
 
     def generate_worm_whole(self):        
