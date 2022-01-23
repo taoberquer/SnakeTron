@@ -29,30 +29,56 @@ class Snake:
     def move(self):
         if self.direction == "right":
             self.rect.x += self.vel
+            if self.settings["toric_grid"] and self.rect.x > self.settings['screen_width']:
+                self.rect.x = 0
+
         elif self.direction == "left":
             self.rect.x -= self.vel
+            if self.settings["toric_grid"] and self.rect.x < 0:
+                self.rect.x = self.settings['screen_width'] - self.settings['size']
+
         elif self.direction == "up":
             self.rect.y -= self.vel
+            if self.settings["toric_grid"] and self.rect.y < 0:
+                self.rect.y = self.settings['screen_height'] - self.settings['size']
+
         elif self.direction == "down":
             self.rect.y += self.vel
+            if self.settings["toric_grid"] and self.rect.y > self.settings['screen_height']:
+                self.rect.y = 0
+
         self.remove_last_body()
         self.generate_body()
 
     def check_collision(self, other_snake):
-        if self.rect.x < 0 or self.rect.x > self.settings['screen_width']-self.settings['size'] or self.rect.y < 0 or self.rect.y > \
-                self.settings['screen_height']-self.settings['size']:
+        if self.check_self_collision():
             return True
+
+        if not self.settings['toric_grid'] and self.check_walls_collision():
+            return True
+        
+        if self.check_snake_collision(other_snake):
+            return True
+                
+        return False
+
+
+    def check_walls_collision(self):   
+        return self.rect.x < 0 or self.rect.x > self.settings['screen_width']-self.settings['size'] or self.rect.y < 0 or self.rect.y > \
+                self.settings['screen_height']-self.settings['size']    
+
+    def check_self_collision(self):
         for index, body in enumerate(self.body):
             if (index != len(self.body) - 1) and (self.rect.x == body.rect.x and self.rect.y == body.rect.y):
                 return True
-        
+        return False
+
+    def check_snake_collision(self, other_snake):
         if other_snake:
             for index, body in enumerate(other_snake.body):
                 if self.rect.x == body.rect.x and self.rect.y == body.rect.y:
                     return True
-        
         return False
-
 
     def check_food_collision(self, food):
         if self.rect.x == food.rect.x and self.rect.y == food.rect.y:
