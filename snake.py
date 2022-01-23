@@ -26,7 +26,7 @@ class Snake:
             return
         self.direction = direction
 
-    def move(self):
+    def move(self, specials):
         if self.direction == "right":
             self.rect.x += self.vel
             if self.settings["toric_grid"] and self.rect.x > self.settings['screen_width']:
@@ -46,6 +46,9 @@ class Snake:
             self.rect.y += self.vel
             if self.settings["toric_grid"] and self.rect.y > self.settings['screen_height']:
                 self.rect.y = 0
+            
+        if self.settings["wormhole"] and specials['wormhole_first']:
+                self.cross_wormhole(specials)
 
         self.remove_last_body()
         self.generate_body()
@@ -95,3 +98,33 @@ class Snake:
 
     def remove_last_body(self):
         self.body.pop(0)
+    
+    def cross_wormhole(self, specials):
+
+        if (self.rect.x == specials['wormhole_first'].rect.x and self.rect.y == specials['wormhole_first'].rect.y):
+            if self.direction == "right":
+                self.rect.x = specials['wormhole_sec'].rect.x + self.settings['size']
+                self.rect.y = specials['wormhole_sec'].rect.y
+            elif self.direction == "left":
+                self.rect.x = specials['wormhole_sec'].rect.x - self.settings['size']
+                self.rect.y = specials['wormhole_sec'].rect.y
+            elif self.direction == "up":
+                self.rect.x = specials['wormhole_sec'].rect.x 
+                self.rect.y = specials['wormhole_sec'].rect.y - self.settings['size']
+            elif self.direction == "down":
+                self.rect.x = specials['wormhole_sec'].rect.x 
+                self.rect.y = specials['wormhole_sec'].rect.y + self.settings['size']
+        
+        if (self.rect.x == specials['wormhole_sec'].rect.x and self.rect.y == specials['wormhole_sec'].rect.y):
+            if self.direction == "right":
+                self.rect.x = specials['wormhole_first'].rect.x + self.settings['size']
+                self.rect.y = specials['wormhole_first'].rect.y
+            elif self.direction == "left":
+                self.rect.x = specials['wormhole_first'].rect.x - self.settings['size']
+                self.rect.y = specials['wormhole_first'].rect.y
+            elif self.direction == "up":
+                self.rect.x = specials['wormhole_first'].rect.x 
+                self.rect.y = specials['wormhole_first'].rect.y - self.settings['size']
+            elif self.direction == "down":
+                self.rect.x = specials['wormhole_first'].rect.x 
+                self.rect.y = specials['wormhole_first'].rect.y + self.settings['size']
