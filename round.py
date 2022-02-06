@@ -2,13 +2,19 @@ import pygame
 import random
 
 from food import Food
+from wall import Wall
 from wormhole import Wormhole
 from score import Score
 from snake import Snake
 
+
 class Round:
     def __init__(self, screen, settings):
         self.screen = screen
+        self.walls_height_end = settings['screen_height'] - settings['size']
+        self.walls_height_start = 0
+        self.walls_width_end = settings['screen_width'] - settings['size']
+        self.walls_width_start = 0
         self.settings = settings
         self.snakes = self.init_sakes()
         self.score = Score()
@@ -18,9 +24,10 @@ class Round:
         self.wormhole = None
         self.specials['wormhole_first'] = None
         self.specials['wormhole_sec'] = None
+        self.specials['walls'] = []
         self.font = pygame.font.Font(None, 24)
-        self.font_color = (255,255,255)
-        self.font_background = (0,0,0)
+        self.font_color = (255, 255, 255)
+        self.font_background = (0, 0, 0)
 
     def init_sakes(self):
         snakes = [Snake(100, 200, self.settings)]
@@ -33,12 +40,16 @@ class Round:
             self.screen.fill((0, 0, 0))
             if self.settings['wormhole']:
                 self.generate_worm_whole()
+            if self.settings['random_walls']:
+                self.generate_random_walls()
+            if self.settings['dynamic_random_walls']:
+                self.reduce_walls()
             self.display_snakes()
             self.update_ath()
             self.display_specials()
 
             pygame.display.update()
-            
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game_over = True
@@ -47,25 +58,28 @@ class Round:
 
             self.snakes_move()
             pygame.time.Clock().tick(15)
-        
+
         self.save_best_score()
-    
+
     def update_ath(self):
         # Player1 score
-        player1_score = self.font.render(f"Score : {len(self.snakes[0].body) - 1}", True, self.font_color, self.font_background)
+        player1_score = self.font.render(f"Score : {len(self.snakes[0].body) - 1}", True, self.font_color,
+                                         self.font_background)
         player1_score_rect = player1_score.get_rect()
         player1_score_rect.x, player1_score_rect.y = 10, 10
         self.screen.blit(player1_score, player1_score_rect)
 
         # Player2 score
         if self.settings['multiplayer']:
-            player2_score = self.font.render(f"Score : {len(self.snakes[1].body) - 1}", True, self.font_color, self.font_background)
+            player2_score = self.font.render(f"Score : {len(self.snakes[1].body) - 1}", True, self.font_color,
+                                             self.font_background)
             player2_score_rect = player2_score.get_rect()
             player2_score_rect.topright = (self.settings['screen_width'] - 10, 10)
             self.screen.blit(player2_score, player2_score_rect)
 
         # best score 
-        best_score = self.font.render(f"Best score : {self.score.best_score}", True, self.font_color, self.font_background)   
+        best_score = self.font.render(f"Best score : {self.score.best_score}", True, self.font_color,
+                                      self.font_background)
         best_score_rect = best_score.get_rect()
         best_score_rect.centerx = self.settings['screen_width'] / 2
         best_score_rect.y = 10
@@ -92,10 +106,9 @@ class Round:
             self.snakes[1].set_direction(switch[key])
 
     def generate_food(self):
-        
         self.specials["food"] = Food(self.specials, self.settings['size'])
 
-    def generate_worm_whole(self):        
+    def generate_worm_whole(self):
         num = random.randint(0, 100)
         if num == 1:
             self.wormhole = None
@@ -105,6 +118,27 @@ class Round:
             self.specials['wormhole_first'] = self.wormhole.first
             self.specials['wormhole_sec'] = self.wormhole.sec
 
+    def generate_random_walls(self):
+        num = random.randint(0, 50)
+        if num == 1:
+            self.specials['walls'].append(Wall(self.specials, self.settings['size']))
+
+    def reduce_walls(self):
+        num = random.randint(0, 50)
+        if num == 1:
+            for index in range(0, self.walls_height_end + self.settings['size'], self.settings['size']):
+                self.specials['walls'].append(Wall(self.specials, self.settings['size'], x=self.walls_width_start, y=index, random=False))
+                self.specials['walls'].append(Wall(self.specials, self.settings['size'], x=self.walls_width_end, y=index, random=False))
+            for index in range(0, self.walls_width_end, self.settings['size']):
+                self.specials['walls'].append(Wall(self.specials, self.settings['size'], x=index, y=self.walls_height_start, random=False))
+                self.specials['walls'].append(Wall(self.specials, self.settings['size'], x=index, y=self.walls_height_end, random=False))
+            self.walls_height_start += self.settings['size']
+            self.walls_height_end -= self.settings['size']
+            self.walls_width_start += self.settings['size']
+            self.walls_width_end -= self.settings['size']
+            self.generate_food()
+
+
     def display_snakes(self):
         for snake in self.snakes:
             for part in snake.body:
@@ -113,16 +147,23 @@ class Round:
     def snakes_move(self):
         for snake in self.snakes:
             snake.move(self.specials)
-        if self.snakes_collide(self.snakes):
+        if self.snakes_collide(self.snakes) or self.snakes_collide_walls():
             self.game_over = True
             return
         if self.snakes_check_food_collision(self.specials['food']):
             self.generate_food()
 
+    def snakes_collide_walls(self):
+        for snake in self.snakes:
+            for wall in self.specials['walls']:
+                if snake.body[0].rect.colliderect(wall.rect):
+                    return True
+
     def snakes_collide(self, snakes):
         if not self.settings['multiplayer']:
             return snakes[0].check_collision(None)
-        
+
+
         for snake in snakes:
             for other_snake in snakes:
                 if snake != other_snake:
@@ -133,7 +174,7 @@ class Round:
         for snake in self.snakes:
             if snake.check_food_collision(food):
                 return True
-    
+
     def save_best_score(self):
         best_score = max([len(snake.body) for snake in self.snakes])
         if self.score.best_score < best_score:
@@ -141,6 +182,10 @@ class Round:
 
     def display_specials(self):
         self.screen.blit(self.specials['food'].image, self.specials['food'].rect)
+
+        if self.specials['walls'] != []:
+            for wall in self.specials['walls']:
+                self.screen.blit(wall.image, wall.rect)
 
         if self.specials['wormhole_first']:
             self.screen.blit(self.specials['wormhole_first'].image, self.specials['wormhole_first'].rect)
